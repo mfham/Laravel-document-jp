@@ -10,3 +10,31 @@ Route::get('/', function()
     return 'Hello World';
 });
 ```
+
+## Other Basic Routes
+
+```php
+Route::post('foo/bar', function()
+{
+    return 'Hello World';
+});
+
+Route::put('foo/bar', function()
+{
+    //
+});
+
+Route::delete('foo/bar', function()
+{
+    //
+});
+```
+## Registering A Route That Responds To Any HTTP Verb
+
+```php
+Route::any('foo', function()
+{
+    return 'Hello World';
+});
+```
+しばしば、ルートのためにURLを生成する必要があり、```url```ヘルパーを使うかもしれません。
