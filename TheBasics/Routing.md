@@ -57,4 +57,29 @@ Laravelはアプリケーションによって管理されているアクティ�
 ```
 POST、PUT、DELETEリクエストで、手動でCSRFトークンを確かめる必要はありません。```VerifyCsrfToken```[HTTPミドルウェア](http://laravel.com/docs/5.0/middleware)は、入力リクエストのトークンがセッションに格納されたトークンとマッチするか確かめます。
 
+## X-CSRF-TOKEN
+
+POSTパラメータとしてのCSRFトークンを探していることに加えて、ミドルウェアは```X-CSRF-TOKEN```リクエストヘッダーもチェックします。例えば、metaタグの中にトークンを格納できたり、全てのリクエストヘッダーにそれを加えるようjQueryに指示することも出来ます。
+
+```
+<meta name="csrf-token" content="{{ csrf_token() }}" />
+
+$.ajaxSetup({
+        headers: {
+            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        }
+    });
+```
+今、全てのAJAXリクエストは自動的にCSRFトークンを含みます。
+```
+$.ajax({
+    url: "/foo/bar",
+})
+```
+
+## X-XSRF-TOKEN
+
+Laravelは```XSRF-TOKEN```クッキーの中にもCSRFトークンを格納します。クッキーの値も使えます。```X-XSRF-TOKEN```リクエストヘッダーにセットするのにクッキーの値を使えます。AngularのようないくつかのJavascriptフレームワークでは、これを自動的にやります。
+
+注意:```X-CSRF-TOKEN```と```X-XSRF-TOKEN```の違いは、Laravelのクッキーは常に暗号化されるので、前者は平文の値を使い、後者は暗号化された値を使います。もしトークンの値を提供するために```csrf_token()```関数を使うなら、```X-CSRF-TOKEN```ヘッダーを使いたくなるでしょう。
 
