@@ -1,6 +1,6 @@
 # Basic Routing
 
-アプリケーションのためのほとんどのルーティングを```app/Http/routes.php```ファイルで定義でき、```App\Providers\RouteServiceProvider```クラスによってロードされます。ほとんどの基礎的なLaravelのルートは、簡単にURLや```Closure```を受け入れます。
+アプリケーションのためのほとんどのルーティングを`app/Http/routes.php`ファイルで定義でき、`App\Providers\RouteServiceProvider`クラスによってロードされます。ほとんどの基礎的なLaravelのルートは、簡単にURLや`Closure`を受け入れます。
 
 ## Basic Get Route
 
@@ -37,7 +37,7 @@ Route::any('foo', function()
     return 'Hello World';
 });
 ```
-しばしば、ルートのためにURLを生成する必要があり、```url```ヘルパーを使うかもしれません。
+しばしば、ルートのためにURLを生成する必要があり、`url`ヘルパーを使うかもしれません。
 
 # CSRF Protection
 
@@ -47,21 +47,21 @@ Laravelはアプリケーションによって管理されているアクティ�
 
 ## Insert The CSRF Token Into A Form
 
-```
+```html
 <input type="hidden" name="_token" value="<?php echo csrf_token(); ?>">
 ```
 もちろん、Blade[テンプレートエンジン](http://laravel.com/docs/5.0/templates)使うと
 
-```
+```html
 <input type="hidden" name="_token" value="{{ csrf_token() }}">
 ```
-POST、PUT、DELETEリクエストで、手動でCSRFトークンを確かめる必要はありません。```VerifyCsrfToken```[HTTPミドルウェア](http://laravel.com/docs/5.0/middleware)は、入力リクエストのトークンがセッションに格納されたトークンとマッチするか確かめます。
+POST、PUT、DELETEリクエストで、手動でCSRFトークンを確かめる必要はありません。`VerifyCsrfToken`[HTTPミドルウェア](http://laravel.com/docs/5.0/middleware)は、入力リクエストのトークンがセッションに格納されたトークンとマッチするか確かめます。
 
 ## X-CSRF-TOKEN
 
-POSTパラメータとしてのCSRFトークンを探していることに加えて、ミドルウェアは```X-CSRF-TOKEN```リクエストヘッダーもチェックします。例えば、metaタグの中にトークンを格納できたり、全てのリクエストヘッダーにそれを加えるようjQueryに指示することも出来ます。
+POSTパラメータとしてのCSRFトークンを探していることに加えて、ミドルウェアは`X-CSRF-TOKEN`リクエストヘッダーもチェックします。例えば、metaタグの中にトークンを格納できたり、全てのリクエストヘッダーにそれを加えるようjQueryに指示することも出来ます。
 
-```
+```html
 <meta name="csrf-token" content="{{ csrf_token() }}" />
 
 $.ajaxSetup({
@@ -79,7 +79,20 @@ $.ajax({
 
 ## X-XSRF-TOKEN
 
-Laravelは```XSRF-TOKEN```クッキーの中にもCSRFトークンを格納します。クッキーの値も使えます。```X-XSRF-TOKEN```リクエストヘッダーにセットするのにクッキーの値を使えます。AngularのようないくつかのJavascriptフレームワークでは、これを自動的にやります。
+Laravelは`XSRF-TOKEN`クッキーの中にもCSRFトークンを格納します。クッキーの値も使えます。`X-XSRF-TOKEN`リクエストヘッダーにセットするのにクッキーの値を使えます。AngularのようないくつかのJavascriptフレームワークでは、これを自動的にやります。
 
-注意:```X-CSRF-TOKEN```と```X-XSRF-TOKEN```の違いは、Laravelのクッキーは常に暗号化されるので、前者は平文の値を使い、後者は暗号化された値を使います。もしトークンの値を提供するために```csrf_token()```関数を使うなら、```X-CSRF-TOKEN```ヘッダーを使いたくなるでしょう。
+注意:`X-CSRF-TOKEN`と`X-XSRF-TOKEN`の違いは、Laravelのクッキーは常に暗号化されるので、前者は平文の値を使い、後者は暗号化された値を使います。もしトークンの値を提供するために`csrf_token()`関数を使うなら、`X-CSRF-TOKEN`ヘッダーを使いたくなるでしょう。
+
+# Method Spoofing
+
+HTMLフォームは`PUT`、`PATCH`、`DELETE`動作をサポートしません。だから、HTMLフォームから呼ばれる`PUT`、`PATCH`、`DELETE`ルートを定義するとき、フォームにhidden`_method`フィールドを追加する必要があります。
+
+`_method`フィールドで送られる値はHTTPリクエストメソッドとして使われます。例えば、
+
+```html
+<form action="/foo/bar" method="POST">
+    <input type="hidden" name="_method" value="PUT">
+    <input type="hidden" name="_token" value="<?php echo csrf_token(); ?>">
+</form>
+```
 
