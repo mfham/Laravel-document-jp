@@ -181,7 +181,7 @@ if ($route->input('id') == 1)
 }
 ```
 
-`Illuminate\Http\Request`インスタンスを通じて現在のルートパラメータにもアクセスできます。現在のリクエストのためのリクエストインスタンスは`Request`ファサードを通じて、もしくは依存性が注入された`Illuminate\Http\Request`のタイプEヒンティングによってアクセスされます。
+`Illuminate\Http\Request`インスタンスを通じて現在のルートパラメータにもアクセスできます。現在のリクエストのためのリクエストインスタンスは`Request`ファサードを通じて、もしくは依存性が注入された`Illuminate\Http\Request`のタイプヒンティングによってアクセスされます。
 
 ```php
 use Illuminate\Http\Request;
@@ -193,4 +193,36 @@ Route::get('user/{id}', function(Request $request, $id)
         //
     }
 });
+```
+
+# Named Routes
+
+名前付きルートは都合よくURLを生成する、もしくは特定のルートに対してリダイレクトするのを可能にします。配列の`as`キーでルートに名前を付けられます。
+
+```php
+Route::get('user/profile', ['as' => 'profile', function()
+{
+    //
+}]);
+```
+コントローラーアクションに対してルート名も付けられます。
+
+```php
+Route::get('user/profile', [
+    'as' => 'profile', 'uses' => 'UserController@showProfile'
+]);
+```
+
+今、URL生成もしくはリダイレクトのとき、ルート名を使います。
+
+```php
+$url = route('profile');
+
+$redirect = redirect()->route('profile');
+```
+
+`currentRouteName`メソッドはハンドリングしている現在のリクエストのルートの名前を返します。
+
+```php
+$name = Route::currentRouteName();
 ```
