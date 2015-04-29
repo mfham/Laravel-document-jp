@@ -95,4 +95,102 @@ HTMLフォームは`PUT`、`PATCH`、`DELETE`動作をサポートしません�
     <input type="hidden" name="_token" value="<?php echo csrf_token(); ?>">
 </form>
 ```
+# Route Parameters
 
+もちろん、ルート内のリクエストURLのセグメントを補足することができます。
+
+## Basic Route Parameter
+
+```php
+Route::get('user/{id}', function($id)
+{
+    return 'User '.$id;
+});
+```
+
+注意: ルートパラメーターは`-`文字列を含むことができません。代わりにアンダースコア(`_`)を使ってください。
+
+## Optional Route Parameters
+
+```php
+Route::get('user/{name?}', function($name = null)
+{
+    return $name;
+});
+```
+
+## Optional Route Parameters With Default Value
+
+```php
+Route::get('user/{name?}', function($name = 'John')
+{
+    return $name;
+});
+```
+## Regular Expression Parameter Constraints
+
+```php
+Route::get('user/{name}', function($name)
+{
+    //
+})
+->where('name', '[A-Za-z]+');
+
+Route::get('user/{id}', function($id)
+{
+    //
+})
+->where('id', '[0-9]+');
+```
+
+## Passing An Array Of Constraints
+
+```php
+Route::get('user/{id}/{name}', function($id, $name)
+{
+    //
+})
+->where(['id' => '[0-9]+', 'name' => '[a-z]+'])
+```
+
+## Defining Global Patterns
+
+もし正規表現によってルートパラメータにいつも制約を与えたい場合、`pattern`メソッドが使えます。`RouteServiceProvider`の`boot`メソッドの中でこれらのパターンを定義します。
+
+```php
+$router->pattern('id', '[0-9]+');
+```
+
+一度パターンが定義されたら、そのパラメータを使う全てのルートに適用されます。
+
+```php
+Route::get('user/{id}', function($id)
+{
+    // Only called if {id} is numeric.
+});
+```
+
+## Accessing A Route Parameter Value
+
+もしルートの外でルートパラメータにアクセスする必要がある場合、`input`メソッドを使います。
+
+```php
+if ($route->input('id') == 1)
+{
+    //
+}
+```
+
+`Illuminate\Http\Request`インスタンスを通じて現在のルートパラメータにもアクセスできます。現在のリクエストのためのリクエストインスタンスは`Request`ファサードを通じて、もしくは依存性が注入された`Illuminate\Http\Request`のタイプEヒンティングによってアクセスされます。
+
+```php
+use Illuminate\Http\Request;
+
+Route::get('user/{id}', function(Request $request, $id)
+{
+    if ($request->route('id'))
+    {
+        //
+    }
+});
+```
