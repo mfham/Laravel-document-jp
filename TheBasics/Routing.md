@@ -226,3 +226,101 @@ $redirect = redirect()->route('profile');
 ```php
 $name = Route::currentRouteName();
 ```
+
+## Route Groups
+
+時々、ルートの多くはURLセグメント、ミドルウェア、名前空間など、共通の要件を共有します。個々のルートのそれぞれのオプションを明記する代わりに、属性を多くのルートに提供するルートグループを使ってもよいです。
+共有された属性は`Route::group`メソッドの最初のパラメーターとして配列フォーマットで明記されます。
+
+### Middleware
+
+ミドルウェアは、グループ属性の配列に`middleware`パラメータでミドルウェアのリストを定義することによって、グループ内の全てのルートに提供される。
+
+```php
+Route::group(['middleware' => ['foo', 'bar']], function()
+{
+    Route::get('/', function()
+    {
+        // Has Foo And Bar Middleware
+    });
+
+    Route::get('user/profile', function()
+    {
+        // Has Foo And Bar Middleware
+    });
+});
+```
+
+### Namespaces
+
+グループ内の全てのコントローラに対して名前空間を明記するためにグループ属性配列の中で`namespace`パラメータを使えます。
+
+```php
+Route::group(['namespace' => 'Admin'], function()
+{
+    // Controllers Within The "App\Http\Controllers\Admin" Namespace
+
+    Route::group(['namespace' => 'User'], function()
+    {
+        // Controllers Within The "App\Http\Controllers\Admin\User" Namespace
+    });
+});
+```
+
+注意: デフォルトで、`RouteServiceProvider`は名前空間グループ内に`routes.php`ファイルを含み、`App\Http\Controllers`の名前空間接頭辞を明記せずにコントローラールートを登録できます。
+
+### Sub-Domain Routing
+
+Laravelルートはワイルドカードサブドメインも操作し、ドメインからワイルドカードパラメータを渡します。
+
+#### Registering Sub-Domain Routes
+
+```php
+Route::group(['domain' => '{account}.myapp.com'], function()
+{
+
+    Route::get('user/{id}', function($account, $id)
+    {
+        //
+    });
+});
+```
+
+### Route Prefixing
+
+ルートのグループは、グループの属性配列の中で`prefix`オプションを使うことで接頭辞をつけることが出来ます。
+
+```php
+Route::group(['prefix' => 'admin'], function()
+{
+    Route::get('users', function()
+    {
+        // Matches The "/admin/users" URL
+    });
+});
+```
+ルートへの共通のパラメータを渡すために`prefix`パラメーターを使うこともできます。
+
+#### Registering a URL parameter in a route prefix
+
+```php
+Route::group(['prefix' => 'accounts/{account_id}'], function()
+{
+    Route::get('detail', function($account_id)
+    {
+        //
+    });
+});
+```
+
+接頭辞の中の名前付きパラメータのためにパラメーター制約を定義することでさえできます。
+
+```php
+Route::group([
+    'prefix' => 'accounts/{account_id}',
+    'where' => ['account_id' => '[0-9]+'],
+], function() {
+
+    // Define Routes Here
+});
+```
