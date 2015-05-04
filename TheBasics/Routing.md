@@ -324,3 +324,65 @@ Route::group([
     // Define Routes Here
 });
 ```
+
+## Route Model Binding
+
+Laravelモデルバインドはルートにクラスインスタンスを注入するために便利な方法を提供します。例えば、ユーザーIDを注入する代わりに、与えられたIDにマッチする全体のUserクラスインスタンスを注入できます。
+与えられたパラメータに対してクラスを明記するために、最初にルーターの`model`メソッドを使ってください。`RouteServiceProvider::boot`メソッドの中に、モデルバインディングを定義すべきです。
+
+#### Binding A Parameter To A Model
+
+```php
+public function boot(Router $router)
+{
+    parent::boot($router);
+
+    $router->model('user', 'App\User');
+}
+```
+
+次に、`{user}`パラメータを含むルートを定義してください。
+
+```php
+Route::get('profile/{user}', function(App\User $user)
+{
+    //
+});
+```
+
+`{user}`パラメーターを`App\User`モデルにバインドしたので、`User`インスタンスはルートに注入されます。だから、例えば`profile/1`へのリクエストは1のIDを持つ`User`インスタンスを注入するでしょう。
+
+注意: もしマッチングモデルインスタンスがデータベース内に見つからなかった場合、404エラーが投げれられます。
+
+もしあなた自身の"not found"動作を明記したい場合、第三引数としてクロージャを`model`メソッドに渡します。
+
+```php
+Route::model('user', 'User', function()
+{
+    throw new NotFoundHttpException;
+});
+```
+
+もしあなた自身の分析ロジックを使いたい場合、`Route::bind`メソッドを使うべきです。`bind`メソッドに渡すクロージャはURLセグメントの値を受け取り、ルートに注入したいクラスのインスタンスを返します。
+
+
+```php
+Route::bind('user', function($value)
+{
+    return User::where('name', $value)->first();
+});
+```
+
+## Throwing 404 Errors
+
+ルートから自動的に404エラーを起こす2つの方法があります。1つ目は`abort`ヘルパーを使います。
+
+```php
+abort(404);
+```
+
+`abort`ヘルパーは簡単に明記されたステータスコードと一緒に`Symfony\Component\HttpFoundation\Exception\HttpException`を投げます。
+
+2つ目は自動的に`Symfony\Component\HttpKernel\Exception\NotFoundHttpException`インスタンスを投げます。
+
+404例外を操作し、これらのエラーに対するカスタムレスポンスを使うためのより多くの情報はドキュメントの[errors](http://laravel.com/docs/5.0/errors#http-exceptions)節で見つかるでしょう。
