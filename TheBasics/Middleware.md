@@ -80,3 +80,33 @@ class AfterMiddleware implements Middleware {
     }
 }
 ```
+
+## Registering Middleware
+
+### Global Middleware
+
+もしアプリケーションへの全てのHTTPリクエストの間ミドルウェアを動作させたい場合、シンプルにミドルウェアクラスを`app/Http/Kernel.php`クラスの`$middleware`プロパティ内に並べます。
+
+### Assigning Middleware To Routes
+
+もしミドルウェアに特定のルートをアサインしたい場合、最初に`app/Http/Kernel.php`ファイルの中でミドルウェアに記号キーをアサインしなければなりません。デフォルトで、このクラスの`$routeMiddleware`プロパティはLaravelに含まれるミドルウェアのエントリーを含みます。あなた自身のものを追加するために、簡単にそれをこのリストに追加し、決めたキーにアサインすればよいです。
+例:
+
+```php
+// Within App\Http\Kernel Class...
+
+protected $routeMiddleware = [
+   'auth' => 'App\Http\Middleware\Authenticate',
+   'auth.basic' => 'Illuminate\Auth\Middleware\AuthenticateWithBasicAuth',
+   'guest' => 'App\Http\Middleware\RedirectIfAuthenticated',
+];
+```
+
+いったんHTTPカーネルの中でミドルウェアが定義されたら、ルートオプション配列の中で`middleware`キーを使ってもいいです。
+
+```php
+Route::get('admin/profile', ['middleware' => 'auth', function () {
+    //
+}]);
+```
+
