@@ -110,3 +110,69 @@ Route::get('admin/profile', ['middleware' => 'auth', function () {
 }]);
 ```
 
+## Middleware Parameters
+
+ミドルウェアは追加のカスタムパラメータも受け取ることが出来ます。例えば、与えられたアクションを実行する前に認証されたユーザーが与えられた"role"をもっているか確かめる必要がある場合、追加引数としてrole名を受け取る`RoleMiddleware`を生成できます。
+
+追加のミドルウェアパラメータは`$next`引数の後でミドルウェアに渡されます。
+
+```php
+<?php
+
+namespace App\Http\Middleware;
+
+use Closure;
+
+class RoleMiddleware
+{
+    /**
+     * Run the request filter.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  \Closure  $next
+     * @param  string  $role
+     * @return mixed
+     */
+    public function handle($request, Closure $next, $role)
+    {
+        if (! $request->user()->hasRole($role)) {
+            // Redirect...
+        }
+
+        return $next($request);
+    }
+
+}
+```
+ミドルウェア名とパラメータを`:`で分けることによってルートを定義するとき、ミドルウェアパラメータは明記されるかもしれない。複数のパラメータはカンマで区切られます。
+
+```php
+Route::put('post/{id}', ['middleware' => 'role:editor', function ($id) {
+    //
+}]);
+```
+
+## Terminable Middleware
+
+ときどき、ミドルウェアはHTTPレスポンスがすでにブラウザへ送られた後にいくつかの仕事をする必要があるかもしれません。例えば、Laravelに含まれている"session"ミドルウェアは、レスポンスがブラウザへ送られた後にストレージへセッションデータを書き込みます。これを成し遂げるために、ミドルウェアに`terminate`メソッドを追加することによってミドルウェアに"terminable"として定義します。
+
+```php
+
+<?php namespace Illuminate\Session\Middleware;
+
+use Closure;
+
+class StartSession
+{
+    public function handle($request, Closure $next)
+    {
+        return $next($request);
+    }
+
+    public function terminate($request, $response)
+    {
+        // Store the session data...
+    }
+}
+```
+`terminate`メソッドはリクエストとレスポンスの両方を受け取るべきです。いったん期限付きミドルウェアを定義したら、HTTPカーネルの中でグローバルミドルウェアのリストにそれを追加すべきです。
