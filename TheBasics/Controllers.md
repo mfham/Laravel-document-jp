@@ -88,3 +88,86 @@ class UserController extends Controller
     }
 }
 ```
+
+## RESTful Resource Controllers
+
+リソースコントローラーはリソース周りのRESTfulコントローラーをビルドするのが困難ではありません。例えば、アプリケーションによって蓄えられる"photos"に関してのHTTPリクエストを扱うコントローラを生成したいと望んでいるかもしれません。`make:controller`Artisanコマンドを使うことで、素早くこのようなコントローラーを生成できます。
+```php
+php artisan make:controller PhotoController
+```
+Artisanコマンドは`app/Http/Controllers/PhotoController.php`にコントローラーファイルを生成します。コントローラーは利用可能なリソース操作のそれぞれのメソッドを含みます。
+次に、リソースフルなルートをコントローラーに登録します。
+```php
+Route::resource('photo', 'PhotoController');
+```
+このシングルルート宣言は、photoリソース上の様々なRESTfullアクションを扱う複数のルートを生成します。同様に、生成されたコントローラーはそれらそれぞれのスタブメソッドを持ち、それらがどのURIや動詞を扱うかを知らせる注釈も含むでしょう。
+
+#### Actions Handled By Resource Controller
+
+| Verb      | Path                  | Action  | Route Name    |
+|:----------|:----------------------|:--------|:--------------|
+| GET       | `/photo`              | index   | photo.index   |
+| GET       | `/photo/create`       | create  | photo.create  |
+| POST      | `/photo`              | store   | photo.store   |
+| GET       | `/photo/{photo}`      | show    | photo.show    |
+| GET       | `/photo/{photo}/edit` | edit    | photo.edit    |
+| PUT/PATCH | `/photo/{photo}`      | update  | photo.update  |
+| DELETE    | `/photo/{photo}`      | destory | photo.destory |
+
+#### Partial Resource Routes
+
+リソースルートを宣言するとき、ルートを扱うためにアクションのサブセットを指定できます。
+```php
+Route::resource('photo', 'PhotoController',
+                ['only' => ['index', 'show']]);
+
+Route::resource('photo', 'PhotoController',
+                ['except' => ['create', 'store', 'update', 'destroy']]);
+```
+
+#### Naming Resource Routes
+
+デフォルトで、全てのリソースコントローラーアクションはルート名を持ちます。しかしながら、オプションで`name`配列を渡すことでそれらの名前をオーバーライド出来ます。
+```php
+Route::resource('photo', 'PhotoController',
+                ['names' => ['create' => 'photo.build']]);
+```
+
+#### Nested Resources
+
+ときどき、"ネストした"リソースのためのルートを定義する必要があるかもしれません。例えば、photoリソースはphotoに付属するかも知れない複数の"コンポーネント"を持つかもしれません。リソースコントローラーを"ネスト"させるために、ルート宣言の中で"dot"表記を使います。
+```php
+Route::resource('photos.comments', 'PhotoCommentController');
+```
+このルートは次のようなURL:`photos/{photos}/comments/{comments}`でアクセスされるかもしれない"ネストした"リソースを登録します。
+```php
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Http\Controllers\Controller;
+
+class PhotoCommentController extends Controller
+{
+    /**
+    * Show the specified photo comment.
+    *
+    * @param  int  $photoId
+    * @param  int  $commentId
+    * @return Response
+    */
+    public function show($photoId, $commentId)
+    {
+        //
+    }
+}
+```
+
+#### Supplementing Resource Controllers
+
+もしデフォルトのリソースルート以上にリソースコントローラーへルートを追加する必要が出てきた場合、`Route::resource`を呼ぶ前にそれらを定義すべきです。さもなければ、`resource`メソッドによって定義されたルートは意図せずにあなたの追加したルートに優先してとられるかもしれません。
+```php
+Route::get('photos/popular', 'PhotoController@method');
+
+Route::resource('photos', 'PhotoController');
+```
