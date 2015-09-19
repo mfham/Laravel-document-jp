@@ -41,3 +41,23 @@ Route::get('user/{id}', 'UserController@showProfile');
 
 コントローラーのルートを定義するとき、全コントローラー名前空間を明記する必要がないことに注意するのはとても重要です。名前空間の"root"である`App\Http\Controllers`の後にくるクラス名の一部だけ定義すれば良いです。デフォルトで、`RouteServiceProvider`は、ルートコントローラー名前空間を含んでいるルートグループ内の`routes.php`ファイルをロードします。
 
+もしネストさせるもしくはより深いPHP名前空間を使っているコントローラーを`App\Http\Controllers`ディレクトリ内にまとめることを選ぶ場合、`App\Http\Controllers`ルート名前空間と比較して、簡単に特定のクラス名を使うことができます。だから、もしフルコントローラークラスが`App\Http\Controllers\Photos\AdminController`である場合、このようにルートを登録してもよいです。
+```php
+Route::get('foo', 'Photos\AdminController@method');
+```
+
+#### Naming Controller Routes
+
+クロージャルートのように、コントローラールート上の名前を指定したいかもしれません。
+```php
+Route::get('foo', ['uses' => 'FooController@method', 'as' => 'name']);
+```
+一度名前をコントローラールートに割り当てたら、アクションに対して簡単にURLを生成することが出来ます。コントローラーアクションに対してURLを生成するために、`action`ヘルパーメソッドを使います。もう一度、ベースの`App\Http\Controllers`名前空間の後に来るコントローラークラス名の部分を指定だけ必要です。
+```php
+$url = action('FooController@method');
+```
+名前付けられたコントローラールートへのURLを生成するために、`route`ヘルパーも使えます。
+```php
+$url = route('name');
+```
+
