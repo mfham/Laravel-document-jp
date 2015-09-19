@@ -61,3 +61,30 @@ $url = action('FooController@method');
 $url = route('name');
 ```
 
+## Controller Middleware
+
+[Middleware](http://laravel.com/docs/5.1/middleware)はこのようなコントローラーのルートに割り当てられるかもしれません。
+```php
+Route::get('profile', [
+    'middleware' => 'auth',
+    'uses' => 'UserController@showProfile'
+]);
+```
+しかしながら、コントローラーのコンストラクタ内でミドルウェアを指定するのがもっと便利です。コントローラーのコンストラクタから`middleware`メソッドを使うことで、簡単にミドルウェアをコントローラーに割り当てられます。ミドルウェアをコントローラークラス上の一つの確かなメソッドに制限することでさえできます。
+```php
+class UserController extends Controller
+{
+    /**
+    * Instantiate a new UserController instance.
+    *
+    * @return void
+    */
+    public function __construct()
+    {
+        $this->middleware('auth');
+
+        $this->middleware('log', ['only' => ['fooAction', 'barAction']]);
+        $this->middleware('subscribed', ['except' => ['fooAction', 'barAction']]);
+    }
+}
+```
