@@ -210,7 +210,6 @@ class UserController extends Controller
         //
     }
 
-
     /**
     * Responds to requests to POST /users/profile
     */
