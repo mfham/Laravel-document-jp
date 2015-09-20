@@ -171,3 +171,63 @@ Route::get('photos/popular', 'PhotoController@method');
 
 Route::resource('photos', 'PhotoController');
 ```
+
+## Implicit Controllers
+
+Laravelはコントローラークラス内の全てのアクションを操作するシングルルートを簡単に定義できるようにしています。最初に、`Route::controller`メソッドを使ってルートを定義します。`controller`メソッドは2つの引数を受け入れます。第一引数はコントローラーが操作するベースURIで、第二引数はコントローラーのクラス名です。
+```php
+Route::controller('users', 'UserController');
+```
+次に、コントローラーにメソッドを追加するだけです。メソッドネームは応答するHTTP動詞から始まり、続いてURIタイトルケースバージョンが続くべきです。
+```php
+<?php
+
+namespace App\Http\Controllers;
+
+class UserController extends Controller
+{
+    /**
+    * Responds to requests to GET /users
+    */
+    public function getIndex()
+    {
+        //
+    }
+
+    /**
+    * Responds to requests to GET /users/show/1
+    */
+    public function getShow($id)
+    {
+        //
+    }
+
+    /**
+    * Responds to requests to GET /users/admin-profile
+    */
+    public function getAdminProfile()
+    {
+        //
+    }
+
+
+    /**
+    * Responds to requests to POST /users/profile
+    */
+    public function postProfile()
+    {
+        //
+    }
+}
+```
+上の例を見ると分かるように、`index`メソッドはコントローラーによって操作されるルートURI、このケースでは`users`に対応します。
+
+#### Assigning Route Names
+
+もしコントローラー上のルートのいくつかを[名前付けたい](http://laravel.com/docs/5.1/routing#named-routes)場合、`controller`絵ソッドの第三引数として名前の配列を渡せばよいです。
+
+```php
+Route::controller('users', 'UserController', [
+    'getShow' => 'user.show',
+]);
+```
