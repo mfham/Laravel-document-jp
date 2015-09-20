@@ -223,10 +223,102 @@ class UserController extends Controller
 
 #### Assigning Route Names
 
-もしコントローラー上のルートのいくつかを[名前付けたい](http://laravel.com/docs/5.1/routing#named-routes)場合、`controller`絵ソッドの第三引数として名前の配列を渡せばよいです。
+もしコントローラー上のルートのいくつかを[名前付けたい](http://laravel.com/docs/5.1/routing#named-routes)場合、`controller`メソッドの第三引数として名前の配列を渡せばよいです。
 
 ```php
 Route::controller('users', 'UserController', [
     'getShow' => 'user.show',
 ]);
+```
+
+## Dependency Injection & Controllers
+
+#### Constructor Injection
+
+Laravelの[サービスコンテナ](http://laravel.com/docs/5.1/container)は全てのLaravelコントローラーを解決するために使われます。結果として、コントローラーがコンストラクタの中に必要とするどんな依存性もタイプヒントできます。
+依存性は自動的に解決され、コントローラーインスタンスの中に注入されます。
+```php
+<?php
+
+namespace App\Http\Controllers;
+
+use Illuminate\Routing\Controller;
+use App\Repositories\UserRepository;
+
+class UserController extends Controller
+{
+    /**
+    * The user repository instance.
+    */
+    protected $users;
+
+    /**
+    * Create a new controller instance.
+    *
+    * @param  UserRepository  $users
+    * @return void
+    */
+    public function __construct(UserRepository $users)
+    {
+        $this->users = $users;
+    }
+}
+```
+もちろん、どんな[Laravel contract](http://laravel.com/docs/5.1/contracts)に対してもタイプヒントできます。もしコンテナがそれを解決できたら、タイプヒントできます。
+
+#### Method Injection
+
+コンストラクタ注入に加えて、コントローラーのアクションメソッドに対しても依存性のタイプヒントが出来ます。例えば、メソッドの一つに対して`Illuminate\Http\Request`インスタンスをタイプヒントしてみましょう。
+
+```php
+<?php
+
+namespace App\Http\Controllers;
+
+use Illuminate\Http\Request;
+use Illuminate\Routing\Controller;
+
+class UserController extends Controller
+{
+    /**
+    * Store a new user.
+    *
+    * @param  Request  $request
+    * @return Response
+    */
+    public function store(Request $request)
+    {
+        $name = $request->input('name');
+
+        //
+    }
+}
+```
+もしコントローラーメソッドがルートパラメーターからの入力も期待している場合、他の依存性の後にルート引数を簡単に並べます。例えば、ルートが次のように定義されている場合、
+```php
+Route::put('user/{id}', 'UserController@update');
+```
+`Illuminate\Http\Request`をタイプヒントしたい、また次のようにコントローラーメソッドを定義することによってルートパラメーター`id`へアクセスしたいかもしれません。
+```php
+<?php
+
+namespace App\Http\Controllers;
+
+use Illuminate\Http\Request;
+use Illuminate\Routing\Controller;
+
+class UserController extends Controller
+{
+    /**
+    * Update the specified user.
+    *
+    * @param  Request  $request
+    * @param  int  $id
+    * @return Response
+    */
+    public function update(Request $request, $id)
+    {
+        //
+    }
+}
 ```
