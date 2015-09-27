@@ -152,3 +152,39 @@ $input = $request->except(['credit_card']);
 $input = $request->except('credit_card');
 ```
 
+## Old Input
+
+Laravelは次のリクエストの間1つのリクエストからの入力を保つのを許可します。この特徴はバリデーションエラーを見つけた後の再登録フォームに特に役立ちます。しかしながら、もしLaravelの[validation services](http://laravel.com/docs/5.1/validation)を使っている場合、Laravelのビルトインバリデーション設備のいくつかはそれらを自動的に呼ぶため、手動でこれらのメソッドを使う必要はほとんどありません。
+
+#### Flashing Input To The Session
+
+`Illuminate\Http\Request`インスタンス上の`flash`メソッドは、現在の入力を[session](http://laravel.com/docs/5.1/session)に出力するので、アプリケーションへのユーザーの次の入力の間それを利用できます。
+```php
+$request->flash();
+```
+`flashOnly`と`flashExcept`メソッドもリクエストデータのサブセットをセッションの中にフラッシュするのに利用できます。
+```php
+$request->flashOnly('username', 'email');
+
+$request->flashExcept('password');
+```
+
+#### Flash Input Into Session Then Redirect
+
+よくリダイレクトに関連する入力を以前のページにフラッシュしたいので、簡単に`wishInput`メソッドを使っているリダイレクトにフラッシュしている入力を連鎖できます。
+```php
+return redirect('form')->withInput();
+
+return redirect('form')->withInput($request->except('password'));
+```
+
+#### Retrieving Old Data
+
+以前のリクエストからフラッシュされた入力を取得するために、`Request`インスタンスの`old`メソッドを使います。`old`メソッドはフラッシュされた入力データを[セッション](http://laravel.com/docs/5.1/session)から抜き出すための便利なヘルパーを提供します。
+```php
+$username = $request->old('username');
+```
+Laravelはグローバル`old`ヘルパー関数も提供します。もし古い入力を[Blade template](http://laravel.com/docs/5.1/blade)内で表示したい場合、`old`ヘルパーを使うのがより便利です。
+```php
+{{ old('username') }}
+```
