@@ -197,3 +197,15 @@ Laravelフレームワークによって作られたすべてのクッキーは�
 ```php
 $value = $request->cookie('name');
 ```
+
+#### Attaching A New Cookie To A Response
+
+Laravelは新しい`Symfony\Component\HttpFoundation\Cookie`インスタンスを生成するためのシンプルな工場として役に立つグローバル`cookie`ヘルパー関数を供給します。クッキーは`withCookie`メソッドを使っている`Illuminate\Http\Response`インスタンスにアタッチされるかもしれません。
+```php
+$response = new Illuminate\Http\Response('Hello World');
+
+$response->withCookie(cookie('name', 'value', $minutes));
+
+return $response;
+```
+5年間続くような長く生存するクッキーを生成するために、最初に`cookie`ヘルパーを引数なしで呼び、そして返ったクッキー工場に`forever`メソッドをチェーンすることで`forever`メソッドが使えます。
