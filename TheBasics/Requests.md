@@ -209,3 +209,46 @@ $response->withCookie(cookie('name', 'value', $minutes));
 return $response;
 ```
 5年間続くような長く生存するクッキーを生成するために、最初に`cookie`ヘルパーを引数なしで呼び、そして返ったクッキー工場に`forever`メソッドをチェーンすることで`forever`メソッドが使えます。
+```php
+$response->withCookie(cookie()->forever('name', 'value'));
+```
+
+## Files
+
+#### Retrieving Uploaded Files
+
+`file`メソッドを使っている`Illuminate\Http\Request`インスタンスに含められたアップロードしたファイルにアクセスしたいかもしれません。`file`メソッドによて返されるオブジェクトは`Symfony\Component\HttpFoundation\File\UploadedFile`クラスのインスタンスで、PHPの`SplFileInfo`クラスを拡張していて、ファイルに関係する様々なメソッドを提供します。
+```php
+$file = $request->file('photo');
+```
+
+#### Verifying File Presence
+
+ファイルが現在の`hasFile`メソッドを使っているリクエスト上にあるか決定したいかもしれません。
+```php
+if ($request->hasFile('photo')) {
+    //
+}
+```
+
+#### Validating Successful Uploads
+
+ファイルが存在しているか確認することに加えて、`isValid`メソッド経由でファイルをアップロードしていることに問題がないことを確かめたいかもしれません。
+```php
+if ($request->file('photo')->isValid()) {
+    //
+}
+```
+
+#### Moving Uploaded Files
+
+アップロードしたファイルを新しい位置に動かすために、`move`メソッドを使うべきです。このメソッドはファイルを一時的な位置(PHP設定によって決定される)からより永続的なあなたの選んだ目的地に移動させます。
+```php
+$request->file('photo')->move($destinationPath);
+
+$request->file('photo')->move($destinationPath, $fileName);
+```
+
+#### Other File Methods
+
+`UploadedFile`インスタンスで利用出来る様々なメソッドが他にもあります。これらのメソッドに関する詳細な情報は[API documentation for the class](http://api.symfony.com/2.7/Symfony/Component/HttpFoundation/File/UploadedFile.html)を確認してください。
