@@ -31,3 +31,54 @@ Route::get('home', function () {
 });
 ```
 注意: 利用できる`Response`メソッドの全てのリストに対して[APIドキュメント](http://laravel.com/api/master/Illuminate/Http/Response.html)や[SymfonyAPIドキュメント](http://api.symfony.com/3.0/Symfony/Component/HttpFoundation/Response.html)を参照してください。
+
+#### Attaching Headers To Responses
+
+多くのレスポンスメソッドはチェーンが可能で流暢なレスポンス形成が許されているということを心に留めておいてください。例えばユーザーに送られる前にヘッダーの一連をレスポンスに加えるためには`header`メソッドを使います。
+
+```php
+return response($content)
+            ->header('Content-Type', $type)
+            ->header('X-Header-One', 'Header Value')
+            ->header('X-Header-Two', 'Header Value');
+```
+
+もしくは、レスポンスに追加されるヘッダー配列を指定するために`withHeaders`メソッドを使います。
+
+```php
+return response($content)
+            ->withHeaders([
+                'Content-Type' => $type,
+                'X-Header-One' => 'Header Value',
+                'X-Header-Two' => 'Header Value',
+            ]);
+```
+
+#### Attaching Cookies To Responses
+
+レスポンスインスタンスの`cookie`ヘルパーメソッドはクッキーをレスポンスにアタッチするのを簡単にしてくれます。例えば、クッキーを生成しレスポンスインスタンスにアタッチするために`cookie`メソッドを使います。
+
+```php
+return response($content)
+                 ->header('Content-Type', $type)
+                 ->cookie('name', 'value');
+```
+
+`cookie`メソッドはもっとクッキーのプロパティをカスタマイズすることを許す追加オプション引数を受け入れます。
+
+```php
+->cookie($name, $value, $minutes, $path, $domain, $secure, $httpOnly)
+```
+
+デフォルトで、Laravelによって生成された全てのクッキーは暗号化され署名されるので、それらはクライアントによって変更や読み取りができません。もしアプリケーションで生成される特定のクッキーのサブセットのために暗号化を使用可能にしたい場合、`App\Http\Middleware\EncryptCookies`ミドルウェアの`$except`プロパティが使えます。
+
+```php
+/**
+  * The names of the cookies that should not be encrypted.
+  *
+  * @var array
+  */
+protected $except = [
+    'cookie_name',
+];
+```
