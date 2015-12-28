@@ -82,3 +82,9 @@ protected $except = [
     'cookie_name',
 ];
 ```
+
+## Other Response Types
+
+`response`ヘルパーは他の種類のレスポンスインスタンスを便利に生成するために使われるかもしれません。`response`ヘルパーが引数なしで呼ばれる時、`Illuminate\Contracts\Routing\ResponseFactory`[contract](https://laravel.com/docs/5.2/contracts)の実装が返されます。この契約はいくつかのヘルパーメソッドにレスポンスを生成するのを供給します。
+
+
