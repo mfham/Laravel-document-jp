@@ -87,4 +87,44 @@ protected $except = [
 
 `response`ヘルパーは他の種類のレスポンスインスタンスを便利に生成するために使われるかもしれません。`response`ヘルパーが引数なしで呼ばれる時、`Illuminate\Contracts\Routing\ResponseFactory`[contract](https://laravel.com/docs/5.2/contracts)の実装が返されます。この契約はいくつかのヘルパーメソッドにレスポンスを生成するのを供給します。
 
+#### View Responses
+
+もしレスポンスステータスとヘッダーを超えてコントロールする必要があるが、レスポンスコンテンツのように[view](https://laravel.com/docs/5.2/views)を返す場合、viewメソッドが使えます:
+
+```php
+return response()
+            ->view('hello', $data)
+            ->header('Content-Type', $type);
+```
+
+もちろん、もしカスタムHTTPステータスコードやカスタムヘッダーを渡す必要がない場合、単純にグローバル`view`ヘルパー関数を使うべきです。
+
+#### JSON Responses
+
+`json`メソッドは与えられた配列を`json_encode`PHP関数を使っているJSONへ変換するだけでなく自動的に`Content-Type`ヘッダーを`application/json`へセットします。
+
+```php
+return response()->json(['name' => 'Abigail', 'state' => 'CA']);
+```
+
+もしJSONPレスポンスを生成したい場合、`setCallback`に加えて`json`メソッドを使います:
+
+```php
+return response()
+            ->json(['name' => 'Abigail', 'state' => 'CA'])
+            ->setCallback($request->input('callback'));
+```
+
+#### File Downloads
+
+`download`メソッドはユーザーのブラウザに強制的に与えられたパスのファイルをダウンロードさせるレスポンスを生成するのに使われます。`download`メソッドは第二引数としてファイル名を受け付け、それはユーザーによってダウンロードされるファイル名を決めます。最後に、第三引数としてHTTPヘッダーの配列を渡します。
+
+```php
+return response()->download($pathToFile);
+
+return response()->download($pathToFile, $name, $headers);
+```
+
+注意: ファイルダウンロードを管理するSymfonyHttpFoundationは、ダウンロードされるファイルがASCIIファイル名であることを必要とします。
+
 
