@@ -127,4 +127,12 @@ return response()->download($pathToFile, $name, $headers);
 
 注意: ファイルダウンロードを管理するSymfonyHttpFoundationは、ダウンロードされるファイルがASCIIファイル名であることを必要とします。
 
+## Redirects
 
+リダイレクトレスポンスは`Illuminate\Http\RedirectResponse`クラスのインスタンスで、それはユーザーを他のURLにリダイレクトさせるのに必要な適切なヘッダーも含んでいます。`RedirectResponse`インスタンスを生成する方法がいくつかあります。一番シンプルなメソッドはグローバルな`redirect`ヘルパーメソッドを使うことです。
+
+```php
+Route::get('dashboard', function () {
+    return redirect('home/dashboard');
+});
+```
