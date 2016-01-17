@@ -169,4 +169,39 @@ return redirect()->route('profile', ['id' => 1]);
 return redirect()->route('profile', [$user]);
 ```
 
+#### Redirecting To Controller Actions
 
+[controller actions](https://laravel.com/docs/5.2/controllers)へのリダイレクトも生成できます。そのようにするためには、単純にコントローラーとアクション名を`action`メソッドへ渡します。Laravelの`RouteServiceProvider`は自動的にデフォルトコントローラー名前空間をセットするので、コントローラーの名前空間全てを指定する必要がないことを覚えておいてください。
+
+```php
+return redirect()->action('HomeController@index');
+```
+
+もちろん、もしコントローラールートがパラメーターを必要とする場合、それらを第二引数として`action`メソッドに渡します。
+
+```php
+return redirect()->action('UserController@profile', ['id' => 1]);
+```
+
+#### Redirecting With Flashed Session Data
+
+新しいURLへのリダイレクトと[データをセッションへ書き出すこと](https://laravel.com/docs/5.2/session#flash-data)は、典型的に同じタイミングで実行されます。そのため、便利のために`RedirectResponse`インスタンス__と__セッションへ書き出したデータをひとつのメソッドチェーンで生成できます。これは特にアクション後のステータスメッセージを保存するのに都合がよいです。
+
+```php
+Route::post('user/profile', function () {
+    // Update the user's profile...
+
+    return redirect('dashboard')->with('status', 'Profile updated!');
+
+});
+```
+
+もちろん、ユーザーが新しいページにリダイレクトした後、書き出したメッセージを[session](https://laravel.com/docs/5.2/session)から取り出して表示させることができます。例えば、[Blade syntax](https://laravel.com/docs/5.2/blade)を使います。
+
+```php
+@if (session('status'))
+    <div class="alert alert-success">
+        {{ session('status') }}
+    </div>
+@endif
+```
