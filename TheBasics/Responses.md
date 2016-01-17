@@ -136,3 +136,37 @@ Route::get('dashboard', function () {
     return redirect('home/dashboard');
 });
 ```
+
+時々、例えば、無効なフォーム送信の後にユーザーを以前のロケーションへリダイレクトさせたいかもしれません。グローバルな`back`ヘルパー関数を使うことでそれを実現できます。しかしながら、`back`関数を使っているルートは`web`ミドルウェアグループを使っているもしくはミドルウェアが適用されたすべてのセッションを持っていることを確かめてください。
+
+```php
+Route::post('user/profile', function () {
+    // Validate the request...
+
+    return back()->withInput();
+});
+```
+
+#### Redirecting To Named Routes
+
+`redirect`ヘルパーをパラメーターなしで呼ぶと、`Illuminate\Routing\Redirector`のインスタンスが返却され、`Redirector`インスタンスのどのメソッドも呼べるようになります。例えば、名前付きルートに対する`RedirectResponse`を生成するため、`route`メソッドを使うことができます。
+
+```php
+return redirect()->route('login');
+```
+
+もしルートがパラメーターを持っている場合、`route`メソッドに第二引数としてそれらを渡すこともできます。
+
+```php
+// For a route with the following URI: profile/{id}
+
+return redirect()->route('profile', ['id' => 1]);
+```
+
+もしEloquentモデルに含まれている"ID"パラメーターありのルートへリダイレクトしている時、単純にモデル自身を渡すことができます。IDは自動的に抽出されます。
+
+```php
+return redirect()->route('profile', [$user]);
+```
+
+
