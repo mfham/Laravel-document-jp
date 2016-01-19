@@ -205,3 +205,38 @@ Route::post('user/profile', function () {
     </div>
 @endif
 ```
+
+## Response Macros
+
+様々なルートやコントローラー内で再利用できるカスタムレスポンスを定義したい場合、`Response`ファサードもしくは`Illuminate\Contracts\Routing\ResponseFactory`の実装上で`macro`メソッドを使えます。
+例えば、[service provider's](https://laravel.com/docs/5.2/providers)`boot`メソッドから、
+
+```php
+<?php
+
+namespace App\Providers;
+
+use Response;
+use Illuminate\Support\ServiceProvider;
+
+class ResponseMacroServiceProvider extends ServiceProvider
+{
+    /**
+    * Perform post-registration booting of services.
+    *
+    * @return void
+    */
+    public function boot()
+    {
+        Response::macro('caps', function ($value) {
+            return Response::make(strtoupper($value));
+        });
+    }
+}
+```
+
+`macro`関数は第一引数で名前を受け入れ、第二引数でクロージャーを受け入れます。マクロのクロージャーは`ResponseFactory`実装もしくは`response`ヘルパーからマクロ名を呼び出す時実行されます。
+
+```php
+return response()->caps('foo');
+```
