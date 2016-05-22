@@ -114,4 +114,207 @@ Hello, {!! $name !!}.
 
 ## Control Structures
 
+テンプレート継承とデータ表示に加えて、Bladeは条件文やループのような普通のPHP制御構造のために便利なショートカットも提供します。これらのショートカットは、とてもきれいな、PHP制御構造で動く簡潔な方法で、一方でPHPの対応するものとなじみのあるままでもあります。
+
+#### If Statements
+
+`@if`、`@elseif`、`@else`、そして`@endif`ディレクティブを使っている`if`文を構築できます。これらのディレクティブはPHPの対応するものと同様に動きます。
+```php
+@if (count($records) === 1)
+    I have one record!
+@elseif (count($records) > 1)
+    I have multiple records!
+@else
+    I don't have any records!
+@endif
+```
+
+便利のために、Bladeは`@unless`ディレクティブも提供します。
+
+```php
+@unless (Auth::check())
+    You are not signed in.
+@endunless
+```
+
+与えられたレイアウトセクションが`@hasSection`ディレクティブを使っているなんらかの中身を持っているか測定できます。
+
+```php
+<title>
+    @hasSection('title')
+        @yield('title') - App Name
+    @else
+        App Name
+    @endif
+</title>
+
+```
+
+#### Loops
+
+条件文に加えて、BladeはPHPのサポートされたルーブ構造で動くために簡単なディレクティブを提供します。
+もう一度言いますが、それらのディレクティブはそれぞれPHPの対応したものと同様に動きます。
+
+```php
+@for ($i = 0; $i < 10; $i++)
+    The current value is {{ $i }}
+@endfor
+
+@foreach ($users as $user)
+    <p>This is user {{ $user->id }}</p>
+@endforeach
+
+@forelse ($users as $user)
+    <li>{{ $user->name }}</li>
+@empty
+    <p>No users</p>
+@endforelse
+
+@while (true)
+    <p>I'm looping forever.</p>
+@endwhile
+```
+
+ループを使うとき、ループを終わらせるもしくは現在のイテレーションをスキップする必要があるかもしれません。
+
+```php
+@foreach ($users as $user)
+    @if($user->type == 1)
+        @continue
+    @endif
+
+    <li>{{ $user->name }}</li>
+
+    @if($user->number == 5)
+        @break
+    @endif
+@endforeach
+```
+
+1行の中にディレクティブ宣言と一緒に条件を含めることもできます。
+
+```php
+@foreach ($users as $user)
+    @continue($user->type == 1)
+
+    <li>{{ $user->name }}</li>
+
+    @break($user->number == 5)
+@endforeach
+```
+
+#### Including Sub-Views
+
+Bladeの`@include`ディレクティブは存在しているビュー内からBladeビューを簡単に含めるようにします。親ビューで利用出来るすべての変数はインクルードされたビューで利用できます。
+```php
+<div>
+    @include('shared.errors')
+
+    <form>
+        <!-- Form Contents -->
+    </form>
+</div>
+```
+
+インクルードされたビューは親ビュー内で利用出来るすべての変数を継承しますが、余分なデータの配列をインクルードされたビューに渡すこともできます。
+
+```php
+@include('view.name', ['some' => 'data'])
+```
+
+注意: キャッシュされたビューの位置を参照するので、Bladeビューの中で`__DIR__`と`__FILE__`定数を使うのは避けるべきです。
+
+#### Rendering Views For Collections
+
+ループを結合し、Bladeの`@each`ディレクティブで1行に含めてもよいです。
+```php
+@each('view.name', $jobs, 'job')
+```
+
+第一引数は、配列もしくはコレクション内でそれぞれの要素をレンダリングするための部分ビューです。第二引数は、イテレートしたい配列もしくはコレクションで、一方第三引数は、ビュー内で現在のイテレーションに割り当てられる変数名です。だから、例えば、もし`jobs`の配列をイテレートしているとき、典型的に部分ビュー内で`job`変数としてそれぞれのjobにアクセスしたいでしょう。
+`@each`ディレクティブに第四引数を渡すこともできます。この引数はもし与えられた配列が空である場合にレンダリングされるビューを決定します。
+```php
+@each('view.name', $jobs, 'job', 'view.empty')
+```
+
+#### Comments
+
+Bladeはビュー内でコメントを定義することもできます。しかしながら、HTMLのコメントとは違って、Bladeのコメントはアプリケーションによって返されるHTML内に含まれません
+```php
+{{-- This comment will not be present in the rendered HTML --}}
+```
+
+## Stacks
+
+Bladeは他のビューもしくはレイアウト内でどこか他にレンダリングされる名前付きスタックにプッシュすることもできます。
+```php
+@push('scripts')
+    <script src="/example.js"></script>
+@endpush
+```
+
+必要に応じて何度でも同じスタックにプッシュできます。スタックをレンダリングするために、`@stack`記法を使ってください。
+```php
+<head>
+    <!-- Head Contents -->
+
+    @stack('scripts')
+</head>
+```
+
+## Service Injection
+
+`@inject`ディレクティブはLaravelの[service container](https://laravel.com/docs/5.2/container)からサービスを検索するのに使われます。`@inject`に渡された第一引数はサービスが入るであろう変数の名前で、一方で第二引数は解決したいサービスのクラス・インターフェース名です。
+```php
+@inject('metrics', 'App\Services\MetricsService')
+
+<div>
+    Monthly Revenue: {{ $metrics->monthlyRevenue() }}.
+</div>
+```
+
+## Extending Blade
+
+Bladeはあなた自身でカスタムしたディレクティブを定義することでさえできます。ディレクティブを登録するために`directive`メソッドを使えます。Bladeコンパイラがディレクティブに出会ったとき、そのパラメータと一緒に提供されたコールバックを呼びます。
+次の例は、与えられた`$var`を整形する`@datetime($var)`ディレクティブを作成します。
+```php
+<?php
+
+namespace App\Providers;
+
+use Blade;
+use Illuminate\Support\ServiceProvider;
+
+class AppServiceProvider extends ServiceProvider
+{
+    /**
+    * Perform post-registration booting of services.
+    *
+    * @return void
+    */
+    public function boot()
+    {
+        Blade::directive('datetime', function($expression) {
+            return "<?php echo with{$expression}->format('m/d/Y H:i'); ?>";
+        });
+    }
+
+    /**
+    * Register bindings in the container.
+    *
+    * @return void
+    */
+    public function register()
+    {
+        //
+    }
+}
+```
+
+分かるように、Laravelの`with`ヘルパー関数はこのディレクティブの中で使われました。`with`ヘルパーは簡単に与えられたオブジェクト・値を返し、便利なメソッドチェーンのために許可します。このディレクティブによって生成される最終的なPHPはこちらです。
+```php
+<?php echo with($var)->format('m/d/Y H:i'); ?>
+```
+
+Bladeディレクティブのロジックを更新した後、キャッシュされたBladeビューの全てを削除する必要があります。キャッシュされたBladeビューは`view:clear`Aritisanコマンドを使って削除できます。
 
